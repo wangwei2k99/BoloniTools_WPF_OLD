@@ -30,7 +30,7 @@
     <ProductName>博洛尼精装工具集</ProductName>
     <PublisherName>王威</PublisherName>
     <MinimumRequiredVersion>1.0.0.21</MinimumRequiredVersion>
-    <ApplicationRevision>24</ApplicationRevision>
+    <ApplicationRevision>33</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>

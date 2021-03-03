@@ -55,7 +55,7 @@ Title="博洛尼工具集" Height="768" Width="1024" WindowStyle="None"  ResizeM
     </Window.Triggers>
     <Grid Background="LightGray" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
         <Grid x:Name="GridTitle" Height="40" VerticalAlignment="Top" Background="#FF1368BD" MouseDown="GridTitle_MouseDown">
-            <TextBlock Text="博洛尼精装工具集(版本号:WW20210222)" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
+            <TextBlock Text="博洛尼精装工具集(版本号:WW20210310)" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Width="192" Margin="0,0,0,0">
                 <Button x:Name="Smile" Cursor="Hand" Background="{x:Null}" BorderThickness="0,0,0,0" Height="Auto" Click="Smile_Click">
                     <materialDesign:PackIcon Kind="Mood" Foreground="#FF1B3861" Width="Auto" Height="Auto"/>

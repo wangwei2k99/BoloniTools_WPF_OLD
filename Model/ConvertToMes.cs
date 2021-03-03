@@ -9,11 +9,11 @@ namespace BoloniTools.Func
         public static DataTable ConvertMes(string[] Files)
         {
             var dts = new Variable().ExportMesDataTable();
-            string[] 柜体 = new string[] { "柜体名称", "柜号", "柜宽", "柜深", "柜高", "柜数量", "柜体编号", "加工信息汇总", "工艺图纸", "物件名称", "长", "宽", "厚", "数量", "总数量", "基材", "封边", "铣型", "包装箱号" };
+            string[] 柜体 = new string[] { "柜体名称", "柜号", "柜宽", "柜深", "柜高", "柜数量", "柜体编号", "打孔图纸号", "工艺图纸", "物件名称", "长", "宽", "厚", "数量", "总数量", "基材", "封边", "铣型", "包装箱号" };
             string[] 铝材 = new string[] { "柜体编号", "成品长", "成品宽", "类别", "预留1", "采购编码", "物件名称", "规格", "长", "宽", "数量", "总数量", "单位", "铣型" };
             string[] 五金 = new string[] { "类别", "采购编码", "物件名称", "规格", "数量", "总数量", "单位", "铣型" };
-            string[] 吸塑门板 = new string[] { "柜体编号", "加工信息汇总", "编码", "物件名称", "长", "宽", "成品长", "成品宽", "厚", "数量", "总数量", "基材", "膜皮型号", "开门方向", "铣型" };
-            string[] 耐磨板门板 = new string[] { "柜体编号", "加工信息汇总", "编码", "物件名称", "长", "宽", "成品长", "成品宽", "厚", "数量", "总数量", "基材", "封边", "开门方向", "铣型" };
+            string[] 吸塑门板 = new string[] { "柜体编号", "打孔图纸号", "编码", "物件名称", "长", "宽", "成品长", "成品宽", "厚", "数量", "总数量", "基材", "膜皮型号", "开门方向", "铣型" };
+            string[] 耐磨板门板 = new string[] { "柜体编号", "打孔图纸号", "编码", "物件名称", "长", "宽", "成品长", "成品宽", "厚", "数量", "总数量", "基材", "封边", "开门方向", "铣型" };
             string[] 工作表 = { "柜体", "铝材", "五金", "耐磨板门板", "单面吸塑门板", "双面吸塑门板" };
             for (int FileIndex = 0; FileIndex < Files.Length; FileIndex++)
             {
@@ -45,6 +45,11 @@ namespace BoloniTools.Func
                                     dt.Columns.Add("总套数", typeof(string));
                                     dt.Columns.Add("类别", typeof(string));
                                     dt.Columns.Add("单位", typeof(string));
+                                    dt.Columns.Add("颜色", typeof(string));
+                                    dt.Columns.Add("基材编码", typeof(string));
+                                    dt.Columns.Add("颜色编码", typeof(string));
+                                    dt.Columns.Add("成品长", typeof(string));
+                                    dt.Columns.Add("成品宽", typeof(string));
                                     Npoi.ColumnSetValue(ref dt, 项目编码, "项目编码");
                                     Npoi.ColumnSetValue(ref dt, 项目名称, "项目名称");
                                     Npoi.ColumnSetValue(ref dt, 订单编号, "订单编号");
@@ -59,6 +64,76 @@ namespace BoloniTools.Func
                                             || dt.Rows[i]["总数量"] == DBNull.Value
                                             || dt.Rows[i]["总数量"].ToString() == "总数")
                                         { dt.Rows[i].Delete(); }
+                                        else
+                                        {
+                                            if (dt.Rows[i]["打孔图纸号"] == DBNull.Value) { dt.Rows[i]["打孔图纸号"] = "0"; }
+                                            dt.Rows[i]["颜色"] = dt.Rows[i]["基材"];
+                                            dt.Rows[i]["颜色编码"] = dt.Rows[i]["采购编码"];
+                                            if (dt.Rows[i]["封边"].ToString().Trim()!="")
+                                            {
+                                                dt.Rows[i]["成品长"] = Convert.ToDouble(dt.Rows[i]["长"]) + 1;
+                                                dt.Rows[i]["成品宽"] = Convert.ToDouble(dt.Rows[i]["宽"]) + 1;
+                                            }
+                                            else
+                                            {
+                                                dt.Rows[i]["成品长"] = Convert.ToDouble(dt.Rows[i]["长"]);
+                                                dt.Rows[i]["成品宽"] = Convert.ToDouble(dt.Rows[i]["宽"]);
+                                            }
+                                            switch (dt.Rows[i]["厚"].ToString().Trim())
+                                            {
+                                                case "16":
+                                                    dt.Rows[i]["基材"] = "16A_E1耐磨板";
+                                                    dt.Rows[i]["基材编码"] = "16A_E1_NMB";
+                                                    break;
+                                                case "18":
+                                                    dt.Rows[i]["基材"] = "18A_E1耐磨板";
+                                                    dt.Rows[i]["基材编码"] = "18A_E1_NMB";
+                                                    break;
+                                                case "25":
+                                                    dt.Rows[i]["基材"] = "25A_E1耐磨板";
+                                                    dt.Rows[i]["基材编码"] = "25A_E1_NMB";
+                                                    break;
+                                                case "30":
+                                                    dt.Rows[i]["基材"] = "30A_E1耐磨板";
+                                                    dt.Rows[i]["基材编码"] = "30A_E1_NMB";
+                                                    break;
+                                                default:
+                                                    dt.Rows[i]["基材"] = $"{ dt.Rows[i]["厚"].ToString().Trim() }A_E1耐磨板";
+                                                    dt.Rows[i]["基材编码"] = $"{ dt.Rows[i]["厚"].ToString().Trim() }A_E1_NMB";
+                                                    break;
+                                            }
+                                            if (dt.Rows[i]["柜号"].ToString().Contains("."))
+                                            {
+                                                dt.Rows[i]["柜号"] = Math.Round(Convert.ToDouble(dt.Rows[i]["柜号"]), 1).ToString();
+                                                dt.Rows[i]["柜体编号"] = dt.Rows[i]["柜号"];
+                                            }
+                                            if (i == 0 || dt.Rows[i]["柜体名称"].ToString() != "" && !dt.Rows[i]["柜体名称"].ToString().Contains("板"))
+                                            {
+                                                string 柜体名称, 柜号, 柜宽, 柜深, 柜高, 柜数量;
+                                                柜体名称 = dt.Rows[i]["柜体名称"].ToString();
+                                                柜号 = dt.Rows[i]["柜号"].ToString();
+                                                柜宽 = dt.Rows[i]["柜宽"].ToString();
+                                                柜深 = dt.Rows[i]["柜深"].ToString();
+                                                柜高 = dt.Rows[i]["柜高"].ToString();
+                                                柜数量 = dt.Rows[i]["柜数量"].ToString();
+                                                DataRow drnew = dt.NewRow();
+                                                drnew["柜体名称"] = 柜体名称;
+                                                drnew["物件名称"] = 柜体名称;
+                                                drnew["柜体编号"] = 柜号;
+                                                drnew["类别"] = "柜体";
+                                                drnew["单位"] = "个";
+                                                drnew["厚"] = 柜高;
+                                                drnew["长"] = 柜宽;
+                                                drnew["宽"] = 柜深;
+                                                drnew["数量"] = 柜数量;
+                                                drnew["基材"] = "耐磨板";
+                                                drnew["基材编码"] = "NMB";
+                                                drnew["采购编码"] = "GT";
+                                                drnew["订单编号"] = 订单编号;
+                                                drnew["打孔图纸号"] = "0";
+                                                dt.Rows.InsertAt(drnew, i);
+                                            }
+                                        }
                                     }
                                     dt.AcceptChanges();
                                     for (int i = 0; i < dt.Rows.Count; i++)
@@ -73,32 +148,6 @@ namespace BoloniTools.Func
                                             {
                                                 dt.Rows[i]["柜体名称"] = dt.Rows[i - 1]["柜体名称"];
                                             }
-                                        }
-                                    }
-                                    for (int i = dt.Rows.Count - 1; i >= 0; i--)
-                                    {
-                                        if (i == 0 || dt.Rows[i]["柜号"].ToString() != "" && !dt.Rows[i]["柜体名称"].ToString().Contains("板"))
-                                        {
-                                            string 柜体名称, 柜号, 柜宽, 柜深, 柜高, 柜数量;
-                                            柜体名称 = dt.Rows[i]["柜体名称"].ToString();
-                                            柜号 = dt.Rows[i]["柜号"].ToString();
-                                            柜宽 = dt.Rows[i]["柜宽"].ToString();
-                                            柜深 = dt.Rows[i]["柜深"].ToString();
-                                            柜高 = dt.Rows[i]["柜高"].ToString();
-                                            柜数量 = dt.Rows[i]["柜数量"].ToString();
-                                            DataRow drnew = dt.NewRow();
-                                            drnew["柜体名称"] = 柜体名称;
-                                            drnew["物件名称"] = 柜体名称;
-                                            drnew["柜体编号"] = 柜号;
-                                            drnew["类别"] = "柜体";
-                                            drnew["单位"] = "个";
-                                            drnew["厚"] = 柜高;
-                                            drnew["长"] = 柜宽;
-                                            drnew["宽"] = 柜深;
-                                            drnew["数量"] = 柜数量;
-                                            drnew["采购编码"] = "GT";
-                                            drnew["订单编号"] = 订单编号;
-                                            dt.Rows.InsertAt(drnew, i);
                                         }
                                     }
                                     dts.Merge(dt);
@@ -136,6 +185,7 @@ namespace BoloniTools.Func
                                         else
                                         {
                                             dt.Rows[i]["物件名称"] = dt.Rows[i]["物件名称"].ToString() + "(铝材)";
+                                            dt.Rows[i]["采购编码"] = dt.Rows[i]["采购编码"].ToString().PadLeft(9, '0');
                                             dt.Rows[i]["基材编码"] = dt.Rows[i]["采购编码"];
                                         }
                                     }
@@ -173,7 +223,10 @@ namespace BoloniTools.Func
                                             || dt.Rows[i]["总数量"].ToString() == "总数量")
                                         { dt.Rows[i].Delete(); }
                                         else
-                                        { dt.Rows[i]["基材编码"] = dt.Rows[i]["采购编码"]; }
+                                        {
+                                            dt.Rows[i]["采购编码"] = dt.Rows[i]["采购编码"].ToString().PadLeft(9, '0');
+                                            dt.Rows[i]["基材编码"] = dt.Rows[i]["采购编码"]; 
+                                        }
                                     }
                                     dt.AcceptChanges();
                                     dts.Merge(dt);
@@ -195,6 +248,9 @@ namespace BoloniTools.Func
                                     dt.Columns.Add("总套数", typeof(string));
                                     dt.Columns.Add("类别", typeof(string));
                                     dt.Columns.Add("柜体名称", typeof(string));
+                                    dt.Columns.Add("颜色", typeof(string));
+                                    dt.Columns.Add("基材编码", typeof(string));
+                                    dt.Columns.Add("颜色编码", typeof(string));
                                     Npoi.ColumnSetValue(ref dt, 项目编码, "项目编码");
                                     Npoi.ColumnSetValue(ref dt, 项目名称, "项目名称");
                                     Npoi.ColumnSetValue(ref dt, 订单编号, "订单编号");
@@ -211,6 +267,35 @@ namespace BoloniTools.Func
                                             || dt.Rows[i]["总数量"] == DBNull.Value
                                             || dt.Rows[i]["总数量"].ToString() == "总数")
                                             dt.Rows[i].Delete();
+                                        else
+                                        {
+                                            if (dt.Rows[i]["打孔图纸号"] == DBNull.Value) { dt.Rows[i]["打孔图纸号"] = "0"; }
+                                            dt.Rows[i]["颜色"] = dt.Rows[i]["基材"];
+                                            dt.Rows[i]["颜色编码"] = dt.Rows[i]["采购编码"];
+                                            switch (dt.Rows[i]["厚"].ToString().Trim())
+                                            {
+                                                case "16":
+                                                    dt.Rows[i]["基材"] = "16A_E1耐磨板";
+                                                    dt.Rows[i]["基材编码"] = "16A_E1_NMB";
+                                                    break;
+                                                case "18":
+                                                    dt.Rows[i]["基材"] = "18A_E1耐磨板";
+                                                    dt.Rows[i]["基材编码"] = "18A_E1_NMB";
+                                                    break;
+                                                case "25":
+                                                    dt.Rows[i]["基材"] = "25A_E1耐磨板";
+                                                    dt.Rows[i]["基材编码"] = "25A_E1_NMB";
+                                                    break;
+                                                case "30":
+                                                    dt.Rows[i]["基材"] = "30A_E1耐磨板";
+                                                    dt.Rows[i]["基材编码"] = "30A_E1_NMB";
+                                                    break;
+                                                default:
+                                                    dt.Rows[i]["基材"] = $"{ dt.Rows[i]["厚"].ToString().Trim() }A_E1耐磨板";
+                                                    dt.Rows[i]["基材编码"] = $"{ dt.Rows[i]["厚"].ToString().Trim() }A_E1_NMB";
+                                                    break;
+                                            }
+                                        }
                                     }
                                     dt.AcceptChanges();
                                     dts.Merge(dt);
@@ -232,6 +317,9 @@ namespace BoloniTools.Func
                                     dt.Columns.Add("总套数", typeof(string));
                                     dt.Columns.Add("类别", typeof(string));
                                     dt.Columns.Add("柜体名称", typeof(string));
+                                    dt.Columns.Add("颜色", typeof(string));
+                                    dt.Columns.Add("基材编码", typeof(string));
+                                    dt.Columns.Add("颜色编码", typeof(string));
                                     Npoi.ColumnSetValue(ref dt, 项目编码, "项目编码");
                                     Npoi.ColumnSetValue(ref dt, 项目名称, "项目名称");
                                     Npoi.ColumnSetValue(ref dt, 订单编号, "订单编号");
@@ -247,7 +335,15 @@ namespace BoloniTools.Func
                                             || dt.Rows[i]["长"] == DBNull.Value
                                             || dt.Rows[i]["总数量"] == DBNull.Value
                                             || dt.Rows[i]["总数量"].ToString() == "总数")
-                                            dt.Rows[i].Delete();
+                                        { dt.Rows[i].Delete(); }
+                                        else
+                                        {
+                                            if (dt.Rows[i]["打孔图纸号"] == DBNull.Value) { dt.Rows[i]["打孔图纸号"] = "0"; }
+                                            dt.Rows[i]["颜色"] = dt.Rows[i]["基材"];
+                                            dt.Rows[i]["颜色编码"] = dt.Rows[i]["膜皮型号"];
+                                            dt.Rows[i]["基材"] = "单面吸塑门板";
+                                            dt.Rows[i]["基材编码"] = dt.Rows[i]["采购编码"];
+                                        }
                                     }
                                     dt.AcceptChanges();
                                     dts.Merge(dt);
@@ -269,6 +365,9 @@ namespace BoloniTools.Func
                                     dt.Columns.Add("总套数", typeof(string));
                                     dt.Columns.Add("类别", typeof(string));
                                     dt.Columns.Add("柜体名称", typeof(string));
+                                    dt.Columns.Add("颜色", typeof(string));
+                                    dt.Columns.Add("基材编码", typeof(string));
+                                    dt.Columns.Add("颜色编码", typeof(string));
                                     Npoi.ColumnSetValue(ref dt, 项目编码, "项目编码");
                                     Npoi.ColumnSetValue(ref dt, 项目名称, "项目名称");
                                     Npoi.ColumnSetValue(ref dt, 订单编号, "订单编号");
@@ -284,7 +383,15 @@ namespace BoloniTools.Func
                                             || dt.Rows[i]["长"] == DBNull.Value
                                             || dt.Rows[i]["总数量"] == DBNull.Value
                                             || dt.Rows[i]["总数量"].ToString() == "总数")
-                                            dt.Rows[i].Delete();
+                                        { dt.Rows[i].Delete(); }
+                                        else
+                                        {
+                                            if (dt.Rows[i]["打孔图纸号"] == DBNull.Value) { dt.Rows[i]["打孔图纸号"] = "0"; }
+                                            dt.Rows[i]["颜色"] = dt.Rows[i]["基材"];
+                                            dt.Rows[i]["颜色编码"] = dt.Rows[i]["膜皮型号"];
+                                            dt.Rows[i]["基材"] = "双面吸塑门板";
+                                            dt.Rows[i]["基材编码"] = dt.Rows[i]["采购编码"];
+                                        }
                                     }
                                     dt.AcceptChanges();
                                     dts.Merge(dt);
@@ -322,7 +429,10 @@ namespace BoloniTools.Func
                 foreach (string s in field) { if (row[s] == DBNull.Value) { row[s] = "0"; } }
             }
             foreach (DataRow row in dts.Rows)
-            { row["规格"] = $"{row["长"]}*{row["宽"]}*{row["厚"]}"; }
+            {
+                row["规格"] = $"{row["长"]}*{row["宽"]}*{row["厚"]}";
+                row["加工信息汇总"] = row["打孔图纸号"];
+            }
             return dts;
         }
         public static void BomVlookup(ref DataTable dt, string BomCol1, string BomCol2, string Material)

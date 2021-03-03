@@ -122,8 +122,14 @@ namespace BoloniTools.Func
             Npoi.DeleteColumns(dt, 3, 15);
             for (int i = dt.Rows.Count - 1; i >= 0; i--)
             {
-                if (dt.Rows[i]["C5"] == DBNull.Value|| !Regex.IsMatch(dt.Rows[i]["C11"].ToString(), @"[0-9]+"))
+                if (dt.Rows[i]["C5"] == DBNull.Value || !Regex.IsMatch(dt.Rows[i]["C11"].ToString(), @"[0-9]+"))
+                {
                     dt.Rows[i].Delete();
+                }
+                else
+                {
+                    dt.Rows[i]["C3"] = dt.Rows[i]["C3"].ToString().PadLeft(9, '0');
+                }
             }
             dt.AcceptChanges();
             dt.Columns.Remove("C4");
@@ -132,14 +138,12 @@ namespace BoloniTools.Func
             dt.Columns.Remove("C8");
             dt.Columns.Remove("C12");
             dt.Columns.Remove("C14");
-
             var query = dt.AsEnumerable().GroupBy(
                 c => new
                 {
                     WLBM = c["C3"],
                     WLMC = c["C5"],
-                    ZSL = c["C11"],
-                    UNIT = c["C13"],
+                    //UNIT = c["C13"],
                     BZ = c["C15"]
                 }
                 ).Select(
@@ -157,7 +161,7 @@ namespace BoloniTools.Func
         }
         public static DataTable InputData(string[] FileNames)
         {
-            DataTable 五金汇总 = new DataTable();
+            DataTable 五金汇总;
             DataSet dss = new DataSet();
             foreach (string File in FileNames)
             {
